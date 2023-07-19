@@ -1,5 +1,5 @@
 /* PROJECT - 
-Data cleaning and analysis for Netflix using SQL 
+Data cleaning and analysis for Netflix using SQL (DATED - 18-july-2023)
 
 Netflix, a leading global streaming platform, possesses a dataset containing information about its shows.
  However, the dataset requires cleaning and analysis to derive valuable insights for business decision-making.
@@ -10,12 +10,14 @@ Netflix, a leading global streaming platform, possesses a dataset containing inf
 
 
 NETFLIX ASSIGNMENT WITH ALL 8 SEGMENTS COVERED 
-points to be noted - 
-1.database name - netflix
-2.table name - netflixx
-3.column name TYPE is changed to content_type (for better udnerstanding).
-4. all segments are line wise.
-5. all query are checked and running succesfully at time of submission.
+Pointers to be noted - 
+1.Database name - netflix
+2.Table name - netflixx
+3.COlumn name TYPE is changed to content_type (for better udnerstanding).
+4. All segments are line wise.
+5. All query are checked and running succesfully at time of submission.
+6.Appropriate comments are written with each segment best of my understanding.
+7.The code is written concisely with appropriate indentations.
 
 */
 
@@ -28,14 +30,18 @@ use netflix;
 -- Netflixx is the table in dataset with columns details using decribe.
 DESCRIBE netflixx;
 
---  QUESTION 2 Number of rows in the "netflixx" table output 8790.
+--  QUESTION 2 Number of rows in the "netflixx" table output 8790 rows .
 SELECT COUNT(*) AS no_rows FROM netflixx;
 
 --  QUESTION 3 identify and handle any missing values in the dataset:
 SELECT *
 FROM netflixx
-WHERE id IS NULL OR show_id IS NULL OR type IS NULL OR title IS NULL or director IS NULL or country IS NULL OR date_added IS NULL or release_year IS NULL or rating IS NULL or duration IS NULL or listed_in IS NULL;
--- no missinng value found zero 
+WHERE id IS NULL OR show_id IS NULL OR type IS NULL OR 
+title IS NULL or director IS NULL or country IS NULL OR 
+date_added IS NULL or release_year IS NULL or 
+rating IS NULL or duration IS NULL or listed_in IS NULL;
+
+-- output  no missinng value found zero  so null values are null and we can go ahead with segments and start solving query as no missing value treatment to be done in this case 
 
 
 
@@ -45,7 +51,7 @@ WHERE id IS NULL OR show_id IS NULL OR type IS NULL OR title IS NULL or director
 
 -- QUESTION 1 - Analyse the distribution of content types (movies vs. TV shows) in the dataset.
 
--- Count the number of movies and TV shows OUTPUT IS - TOTAL MOVIE - 6126 AND TV SHOW - 2664 
+-- Count the number of movies and TV shows  - OUTPUT IS - TOTAL MOVIE - 6126 AND TV SHOW - 2664 
 
 SELECT content_type, COUNT(*) AS content_count 
 FROM netflixx GROUP BY content_type;
@@ -54,7 +60,7 @@ FROM netflixx GROUP BY content_type;
     
     
 -- QUESTION 2. Determine the top 10 countries with the highest number of productions on Netflix.
---  number of productions by country and display the top 10 
+--  number of productions by country and display the top 10 (with united states leading the chart with massive number of 3240 productions.
 SELECT country,COUNT(*) AS production_count
 FROM netflixx GROUP BY country
 ORDER BY production_count DESC LIMIT 10;
@@ -72,7 +78,7 @@ FROM netflixx GROUP BY YEAR ORDER BY year;
 
 -- question 4 Analyse the relationship between content duration and release year.
 /*Calculate the  duration of content by release year  we can focus on the distribution 
-of content duration over different release years.
+of average content duration over different release years.
  group the data by release year and examine the various average content durations for seasons (in number) and movie in minutes
  available for each year. STARTING FROM 2008 , DISRTIBUTION OF DURATION OF CONTENT 
  */
@@ -92,7 +98,7 @@ group by content_type , release_year;
   
   
 --  question 5 Count the number of productions by director and display the top 10 directors
-
+-- made filter in director column by using count , order by , and limit funnction.
 SELECT director, COUNT(*) AS production_count
 FROM netflixx GROUP BY director
 ORDER BY production_count DESC
@@ -112,6 +118,8 @@ FROM netflixx
 group by TYPE,listed_in; 
  
 -- question 2 	Calculate the percentage of movies and TV shows in each genre
+
+-- output with 70% of movies against 30% of tv series but the trend of tv_series is growing phenominal in recent years 
 SELECT content_type,COUNT(show_id)*100/(select count(show_id) from netflixx) as percentage 
 FROM netflixx
 group by content_type;
@@ -120,18 +128,24 @@ group by content_type;
 
 -- question 3 Identify the most popular genres/categories based on the number of productions.
 
+-- output 1. Dramas, International Movies  following with documentires these are the most popular as its the most relased so customers are liking it .
+
 SELECT listed_in AS genre_category,
        COUNT(*) AS production_count
 FROM netflixx GROUP BY listed_in ORDER BY production_count DESC;
 
 
 -- question 4  Calculate the cumulative sum of content duration within each genre.
-select content_type,sum(duration) as cumulative_sum 
-from netflixx 
-group by content_type;   
-    
-    
-    
+-- movie  content duration- 610057
+-- tv shows total seasons sum -  4667 seasons
+ 
+ SELECT content_type , 
+ sum(duration) as total_sum 
+ from netflixx group by content_type;
+ 
+
+ 
+
 -- SEGMENT 4 - Release Date Analysis 
 
 
@@ -139,37 +153,41 @@ SELECT * FROM netflix.netflixx;
 use netflixx;
 
 -- QUESTION 1 Determine the distribution of content releases by month and year.
-
-SELECT MONTH(STR_TO_DATE(date_added, '%m/%d/%Y')) AS month,YEAR(STR_TO_DATE(date_added, '%m/%d/%Y')) AS year,
+-- with year and month complete table is in output for content year and month wise 
+SELECT 
+    MONTHNAME(STR_TO_DATE(date_added, '%m/%d/%Y')) AS month_name,
+YEAR(STR_TO_DATE(date_added, '%m/%d/%Y')) AS year,
 COUNT(*) AS count
 FROM Netflixx
-GROUP BY  month ,year;
+GROUP BY  month_name ,year;
 
 
 
 
 --  QUESTION 2 Analyse the seasonal patterns in content releases.
-
+-- seasonal pattern is almost same for netflix for each month , but most release are in month  july with total 827 dollowing december 
+-- and may and feb are month with lowest realse can be very helful to analyse seasonal change in numbers 
 SELECT
-    EXTRACT(MONTH FROM STR_TO_DATE(date_added, '%m/%d/%Y')) AS release_month,
-    COUNT(*) AS content_count
-FROM netflixx
-GROUP BY  release_month ORDER BY release_month;
-
+    count(*) as content_count,
+    MONTHNAME(STR_TO_DATE(date_added, '%m/%d/%Y')) AS month_name
+FROM
+    netflixx
+    GROUP BY  month_name ORDER BY content_count desc;
 
 
 
 
 -- QUESTION 3 Identify the months and years with the highest number of releases.
-
+-- jan-2021 with highest relase of 257. 
 
 SELECT
-    extract(month from STR_TO_DATE(date_added, '%m/%d/%Y')) AS release_month,
+     MONTHNAME(STR_TO_DATE(date_added, '%m/%d/%Y')) AS month_name,
     year(STR_TO_DATE(date_added, '%m/%d/%Y')) AS year,
 COUNT(*) AS MOST_RELEASE
 FROM NetflixX
-GROUP BY release_month, year
+GROUP BY month_name, year
 ORDER BY MOST_RELEASE DESC;
+
 
 
 -- SEGMENT 5  Rating Analysis 
@@ -193,13 +211,11 @@ ORDER BY rating_count desc;
 /*  breakdown of ratings for each content duration. 
 You can use this information to see how ratings are distributed 
 across different content durations.
-In this situation first did with minimum maximum  duration and second by average od duration for season and movie 
+In this situation first did with minimum maximum  duration and second by average oF duration for season and movie 
  
  */
 
-SELECT 
-    rating,
-    COUNT(*) AS content_count,
+SELECT rating,
     MIN(CASE
         WHEN duration REGEXP '^[0-9]+$' THEN CAST(duration AS UNSIGNED)
         WHEN duration REGEXP '^[0-9]+ min$' THEN CAST(SUBSTRING(duration, 1, LENGTH(duration) - 4) AS UNSIGNED)
@@ -210,24 +226,18 @@ SELECT
         WHEN duration REGEXP '^[0-9]+ min$' THEN CAST(SUBSTRING(duration, 1, LENGTH(duration) - 4) AS UNSIGNED)
         ELSE NULL
     END) AS max_duration
-FROM
-    netflixx
-WHERE
-    duration IS NOT NULL
-    AND duration <> ''
+FROM netflixx
+WHERE duration IS NOT NULL AND duration <> ''
     AND (
         duration REGEXP '^[0-9]+$'
         OR duration REGEXP '^[0-9]+ min$'
     )
-GROUP BY
-    rating 
-ORDER BY
-    content_count DESC;
+GROUP BY rating  ORDER BY rating DESC;
     
    
    
    -- option 2 
-SELECT rating,COUNT(*) AS content_count, 
+SELECT rating, 
 AVG(CASE WHEN content_type = 'Movie' THEN duration_minutes END) AS avg_movie_duration,
 AVG(CASE WHEN content_type = 'TV Show' THEN duration_seasons END) AS avg_tv_show_duration
 FROM (
@@ -235,7 +245,7 @@ FROM (
            CASE WHEN content_type = 'Movie' THEN CAST(SUBSTRING_INDEX(duration, ' ', 1) AS UNSIGNED) END AS duration_minutes,
            CASE WHEN content_type = 'TV Show' THEN CAST(SUBSTRING_INDEX(duration, ' ', 1) AS UNSIGNED) END AS duration_seasons
     FROM netflixx
-) AS data GROUP BY rating  ORDER BY content_count DESC;
+) AS data GROUP BY rating order by rating ;
     
     
     
@@ -245,6 +255,8 @@ FROM (
 
 
 -- Question 1 Identify the most common pairs of genres/categories that occur together in content.
+/* Dramas, International Movies is the best category with co_occurence of 362 times.
+*/
 
 SELECT * FROM
 (
@@ -291,16 +303,18 @@ ORDER BY content_type,listed_in,duration;
 
 
 -- SEGMENT 7 INTERNATIONAL EXPANSION ANALYSIS 
--- 
 
 
--- question 1  identify the countries where Netflix has expanded its content offerings ,THIS WILL SHOW ALL COUNTRY WITH NETFLIX CONTENT 
+
+-- question 1  identify the countries where Netflix has expanded its content offerings 
+
+-- THIS WILL SHOW ALL COUNTRY WITH NETFLIX CONTENT 
 SELECT DISTINCT country
 FROM netflixx;
  
 /* Using sum  for tv series and movied both and ordering in 
 ascending format to see which country has lowest movies and tv shows
-and we as a netflix can focus and expand there as well 
+and we as a netflix can focus to bring content  from  there as well 
 this country are with lowest movie and tv show so might be netflix starting listing this country movies and shows now only .
 */ 
 
